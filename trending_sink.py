@@ -1,33 +1,3 @@
-"""
-trending_sink.py  —  Cầu nối giữa Thành viên 2 (Spark) và Thành viên 3 (Dashboard)
-==================================================================================
-Tài liệu mục 13 cho thấy pipeline của Thành viên 2 hiện chỉ ghi kết quả ra CONSOLE
-(format="console"). Console thì dashboard KHÔNG đọc được. File này bổ sung một sink
-ghi kết quả streaming xuống SQLite (trending.db) để dashboard.py đọc và trực quan hóa.
-
-CÁCH 1 — Dùng nhanh (khuyến nghị): chỉ cần SỬA 3 DÒNG trong trending_products.py
---------------------------------------------------------------------------------
-Thay đoạn writeStream ra console (mục 13) bằng:
-
-    from trending_sink import write_to_sqlite, init_db
-    init_db()                                  # tạo bảng 1 lần
-
-    query = top_products.writeStream \\
-        .outputMode("complete") \\
-        .foreachBatch(write_to_sqlite) \\      # <-- thay cho .format("console")
-        .start()
-    query.awaitTermination()
-
-CÁCH 2 — Chạy trọn gói: `spark-submit trending_sink.py`
---------------------------------------------------------
-File này cũng chứa LẠI toàn bộ pipeline của Thành viên 2 (đọc Kafka -> event-time ->
-watermark -> window 1h -> count) và ghi ra ĐỒNG THỜI console + SQLite, nên có thể chạy
-thay cho trending_products.py mà không mất hành vi cũ.
-
-Lưu ý: outputMode="complete" nghĩa là mỗi micro-batch chứa TOÀN BỘ trạng thái tổng hợp
-hiện tại, nên ta ghi đè (replace) bảng mỗi batch — khớp với cách dashboard mong đợi.
-"""
-
 import os
 import sqlite3
 from datetime import datetime, timezone
